@@ -44,11 +44,13 @@ extension MFiGameController
         case leftThumbstickDown
         case leftThumbstickLeft
         case leftThumbstickRight
+        case leftThumbstickButton
         
         case rightThumbstickUp
         case rightThumbstickDown
         case rightThumbstickLeft
         case rightThumbstickRight
+        case rightThumbstickButton
         
         case a
         case b
@@ -182,6 +184,9 @@ public class MFiGameController: NSObject, GameController
         profile.buttons[GCInputLeftTrigger]?.pressedChangedHandler = { (button, value, pressed) in inputChangedHandler(.leftTrigger, pressed) }
         profile.buttons[GCInputRightShoulder]?.pressedChangedHandler = { (button, value, pressed) in inputChangedHandler(.rightShoulder, pressed) }
         profile.buttons[GCInputRightTrigger]?.pressedChangedHandler = { (button, value, pressed) in inputChangedHandler(.rightTrigger, pressed) }
+        
+        profile.buttons[GCInputLeftThumbstickButton]?.pressedChangedHandler = { (button, value, pressed) in inputChangedHandler(.leftThumbstickButton, pressed) }
+        profile.buttons[GCInputRightThumbstickButton]?.pressedChangedHandler = { (button, value, pressed) in inputChangedHandler(.rightThumbstickButton, pressed) }
         
         // Menu = Primary menu button (Start/+/Menu)
         let menuButton = profile.buttons[GCInputButtonMenu]
