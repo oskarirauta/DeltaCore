@@ -230,7 +230,13 @@ public extension AudioManager
             }
             #endif
             
-            try AVAudioSession.sharedInstance().setActive(true)
+            DispatchQueue.global(qos: .userInitiated).async {
+                do {
+                    try AVAudioSession.sharedInstance().setActive(true)
+                } catch {
+                    print("Failed to activate AVAudioSession: \(error)")
+                }
+            }
         }
         catch
         {
