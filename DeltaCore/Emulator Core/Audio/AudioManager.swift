@@ -19,6 +19,10 @@ private extension AVAudioSession
 {
     func setDeltaCategory(mixWithOthers: Bool = true) throws
     {
+        #if os(tvOS)
+        let options: AVAudioSession.CategoryOptions = mixWithOthers ? [.mixWithOthers] : []
+        try self.setCategory(.playback, mode: .default, options: options)
+        #else
         var options: AVAudioSession.CategoryOptions = [.allowBluetoothA2DP, .allowAirPlay]
 
         if mixWithOthers
@@ -27,6 +31,7 @@ private extension AVAudioSession
         }
 
         try self.setCategory(.playAndRecord, options: options)
+        #endif
     }
 }
 
@@ -218,10 +223,12 @@ public extension AudioManager
             try AVAudioSession.sharedInstance().setDeltaCategory(mixWithOthers: self.mixesWithOtherAudio || !self.shouldInterruptOtherAudio)
             try AVAudioSession.sharedInstance().setPreferredIOBufferDuration(0.005)
             
+            #if !os(tvOS)
             if #available(iOS 13.0, *)
             {
                try AVAudioSession.sharedInstance().setAllowHapticsAndSystemSoundsDuringRecording(true)
             }
+            #endif
             
             try AVAudioSession.sharedInstance().setActive(true)
         }
