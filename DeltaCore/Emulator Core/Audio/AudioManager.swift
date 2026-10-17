@@ -208,39 +208,35 @@ public extension AudioManager
             self?.isMuted = isMuted
         }
         
-        do
-        {
-            // Interrupt other audio by activating a non-mixing session.
-            if self.shouldInterruptOtherAudio
+        DispatchQueue.global(qos: .userInitiated).async {
+            do
             {
-                // Explicitly say 'don't mix with others' to pause anything else that's playing
-                // Then change the category below to allow other audio to be resumed if mixing is on
-                try AVAudioSession.sharedInstance().setDeltaCategory(mixWithOthers: false)
+                // Interrupt other audio by activating a non-mixing session.
+                if self.shouldInterruptOtherAudio
+                {
+                    // Explicitly say 'don't mix with others' to pause anything else that's playing
+                    // Then change the category below to allow other audio to be resumed if mixing is on
+                    try AVAudioSession.sharedInstance().setDeltaCategory(mixWithOthers: false)
+                    try AVAudioSession.sharedInstance().setActive(true)
+                }
+
+                // Allow other audio if mixing is on, OR we're not interrupting other audio anyways.
+                try AVAudioSession.sharedInstance().setDeltaCategory(mixWithOthers: self.mixesWithOtherAudio || !self.shouldInterruptOtherAudio)
+                try AVAudioSession.sharedInstance().setPreferredIOBufferDuration(0.005)
+                
+                #if !os(tvOS)
+                if #available(iOS 13.0, *)
+                {
+                   try AVAudioSession.sharedInstance().setAllowHapticsAndSystemSoundsDuringRecording(true)
+                }
+                #endif
+                
                 try AVAudioSession.sharedInstance().setActive(true)
             }
-
-            // Allow other audio if mixing is on, OR we're not interrupting other audio anyways.
-            try AVAudioSession.sharedInstance().setDeltaCategory(mixWithOthers: self.mixesWithOtherAudio || !self.shouldInterruptOtherAudio)
-            try AVAudioSession.sharedInstance().setPreferredIOBufferDuration(0.005)
-            
-            #if !os(tvOS)
-            if #available(iOS 13.0, *)
+            catch
             {
-               try AVAudioSession.sharedInstance().setAllowHapticsAndSystemSoundsDuringRecording(true)
+                print(error)
             }
-            #endif
-            
-            DispatchQueue.global(qos: .userInitiated).async {
-                do {
-                    try AVAudioSession.sharedInstance().setActive(true)
-                } catch {
-                    print("Failed to activate AVAudioSession: \(error)")
-                }
-            }
-        }
-        catch
-        {
-            print(error)
         }
         
         self.resetAudioEngine()
@@ -265,14 +261,16 @@ public extension AudioManager
         
         self.audioBuffer.isEnabled = false
 
-        do
-        {
-            // Relinquish audio session so other apps can resume playback.
-            try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
-        }
-        catch
-        {
-            print(error)
+        DispatchQueue.global(qos: .utility).async {
+            do
+            {
+                // Relinquish audio session so other apps can resume playback.
+                try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+            }
+            catch
+            {
+                print(error)
+            }
         }
     }
 }
