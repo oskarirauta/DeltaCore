@@ -291,7 +291,7 @@ public class MFiGameController: NSObject, GameController
             // e.g. Switch Pro, PlayStation, and Xbox controllers
             #if os(tvOS)
             homeButton.preferredSystemGestureState = .disabled
-            homeButton.pressedChangedHandler = { (button, value, pressed) in inputChangedHandler(.start, pressed) }
+            homeButton.pressedChangedHandler = { (button, value, pressed) in inputChangedHandler(.menu, pressed) }
             #else
             homeButton.pressedChangedHandler = { (button, value, pressed) in inputChangedHandler(.menu, pressed) }
             
