@@ -171,14 +171,16 @@ public class AudioManager: NSObject, AudioRendering
         // Temporary. Will be replaced with more accurate RingBuffer in resetAudioEngine().
         self.audioBuffer = RingBuffer(preferredBufferSize: 4096)!
         
-        do
-        {
-            // Set category before configuring AVAudioEngine to prevent pausing any currently playing audio from another app.
-            try AVAudioSession.sharedInstance().setDeltaCategory()
-        }
-        catch
-        {
-            print(error)
+        DispatchQueue.global(qos: .userInitiated).async {
+            do
+            {
+                // Set category before configuring AVAudioEngine to prevent pausing any currently playing audio from another app.
+                try AVAudioSession.sharedInstance().setDeltaCategory()
+            }
+            catch
+            {
+                print(error)
+            }
         }
         
         self.audioEngine = AVAudioEngine()
@@ -448,13 +450,15 @@ private extension AudioManager
         let currentlyMixing = AVAudioSession.sharedInstance().categoryOptions.contains(.mixWithOthers)
         guard allowMixing != currentlyMixing else { return }
 
-        do
-        {
-            try AVAudioSession.sharedInstance().setDeltaCategory(mixWithOthers: allowMixing)
-        }
-        catch
-        {
-            print(error)
+        DispatchQueue.global(qos: .userInitiated).async {
+            do
+            {
+                try AVAudioSession.sharedInstance().setDeltaCategory(mixWithOthers: allowMixing)
+            }
+            catch
+            {
+                print(error)
+            }
         }
     }
 
