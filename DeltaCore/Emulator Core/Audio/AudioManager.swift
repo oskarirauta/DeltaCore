@@ -398,11 +398,13 @@ private extension AudioManager
             
             do
             {
+                #if !os(tvOS)
                 // Explicitly set output port since .defaultToSpeaker option pauses external audio.
                 if AVAudioSession.sharedInstance().currentRoute.isOutputtingToReceiver
                 {
                     try AVAudioSession.sharedInstance().overrideOutputAudioPort(.speaker)
                 }
+                #endif
                 
                 try self.audioEngine.start()
                 
